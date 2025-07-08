@@ -21,27 +21,20 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // --- 3. FUNCTIONS ---
 
-// Function to add an exercise to the plan
 function addExercise() {
     const name = exerciseInput.value;
     const duration = parseInt(durationInput.value, 10);
 
     if (name && duration > 0) {
-        // Add to our workout data
         workoutPlan.push({ name, duration });
-
-        // Display it on the page
         const listItem = document.createElement('li');
         listItem.textContent = `${name} (${duration}s)`;
         exerciseList.appendChild(listItem);
-
-        // Clear the input fields
         exerciseInput.value = '';
         durationInput.value = '';
     }
 }
 
-// Function to update the timer display
 function updateDisplay() {
     const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
     const seconds = (timeRemaining % 60).toString().padStart(2, '0');
@@ -49,30 +42,23 @@ function updateDisplay() {
     exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
 }
 
-// Your NEW function
 function playBeep(frequency) {
-    // The line that was here is now gone.
     const oscillator = audioCtx.createOscillator();
-    
     oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime); 
-    
+    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
     oscillator.connect(audioCtx.destination);
     oscillator.start();
     oscillator.stop(audioCtx.currentTime + 0.15);
 }
 
-// --- THIS IS THE 2ND CHANGE: AN UPDATED tick FUNCTION ---
 function tick() {
-    // Decrement the time immediately
+    // This function now correctly handles the timer logic without lag
     timeRemaining--;
     updateDisplay();
 
-    // If the timer just hit zero
     if (timeRemaining === 0) {
-        playBeep(1200); // Play the high-pitched beep immediately
+        playBeep(1200); // High-pitched beep at zero
 
-        // Move to the next exercise or end workout
         currentExerciseIndex++;
         if (currentExerciseIndex < workoutPlan.length) {
             speak(`Next exercise: ${workoutPlan[currentExerciseIndex].name}`);
@@ -83,46 +69,38 @@ function tick() {
             speak("Workout complete!");
             exerciseTitle.textContent = "Finished!";
         }
-    }
-    // If there's still time left, play the countdown beeps
-    else if (timeRemaining < 3 && timeRemaining > 0) {
-        playBeep(880); // Standard pitch
+    } else if (timeRemaining <= 3 && timeRemaining > 0) {
+        playBeep(880); // Standard countdown beeps
     }
 }
 
-// Function to start the workout or the next exercise
 function startNextExercise() {
     timeRemaining = workoutPlan[currentExerciseIndex].duration;
     updateDisplay();
 }
 
-// Main function to start the timer
 function startTimer() {
+    // This function correctly resumes audio and adds the necessary delay
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
     
     if (timerInterval || workoutPlan.length === 0) return;
     
-    // Announce the start immediately
     speak(`Starting with ${workoutPlan[0].name}`);
-    
-    // Prepare the first exercise display
     startNextExercise();
     
-    // Wait 500ms before starting the countdown to avoid audio conflict
+    // This setTimeout is crucial and was missing from your last file
     setTimeout(() => {
         timerInterval = setInterval(tick, 1000);
-    }, 500); // 500ms = half a second
+    }, 500); // 500ms delay
 }
 
-// Function to pause the timer
 function pauseTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
 }
 
-// Function to reset everything
 function resetTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -133,7 +111,6 @@ function resetTimer() {
     countdownDisplay.textContent = "00:00";
 }
 
-// Function for text-to-speech announcements
 function speak(text) {
     const utterance = new SpeechSynthesisUtterance(text);
     speechSynthesis.speak(utterance);
@@ -151,7 +128,7 @@ function saveWorkout() {
     localStorage.setItem('allMyWorkouts', JSON.stringify(allWorkouts));
 
     alert(`Workout "${title}" saved!`);
-    populateDropdown(); 
+    populateDropdown();
     workoutTitleInput.value = '';
 }
 
@@ -170,17 +147,17 @@ function populateDropdown() {
 function loadSelectedWorkout() {
     const selectedTitle = savedWorkoutsDropdown.value;
     if (!selectedTitle) {
-        resetTimer(); 
+        resetTimer();
         return;
     }
-    
+
     const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts'));
     const selectedPlan = allWorkouts[selectedTitle];
-    
+
     workoutPlan = selectedPlan;
-    currentExerciseIndex = 0; 
-    
-    exerciseList.innerHTML = ''; 
+    currentExerciseIndex = 0;
+
+    exerciseList.innerHTML = '';
     workoutPlan.forEach(exercise => {
         const listItem = document.createElement('li');
         listItem.textContent = `${exercise.name} (${exercise.duration}s)`;
@@ -193,7 +170,7 @@ function loadSelectedWorkout() {
     }
 }
 
-// --- 4. EVENT LISTENERS (Connecting buttons to functions) ---
+// --- 4. EVENT LISTENERS ---
 addExerciseBtn.addEventListener('click', addExercise);
 startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', pauseTimer);
@@ -203,18 +180,15 @@ savedWorkoutsDropdown.addEventListener('change', loadSelectedWorkout);
 
 document.addEventListener('DOMContentLoaded', populateDropdown);
 
-
-
 // --- FINAL TEST FOR BEEP ---
 const testBeepBtn = document.getElementById('test-beep-btn');
 
-testBeepBtn.addEventListener('click', () => {
-    console.log('Test Beep button clicked.');
-    // Try to resume the audio context, just in case
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-    // Play the beep immediately
-    playBeep(880);
-});
-
+if (testBeepBtn) { // Check if the button exists before adding listener
+    testBeepBtn.addEventListener('click', () => {
+        console.log('Test Beep button clicked.');
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        playBeep(880);
+    });
+}
