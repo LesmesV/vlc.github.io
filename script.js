@@ -198,3 +198,16 @@ document.addEventListener('DOMContentLoaded', populateDropdown);
 
 
 
+// --- FINAL TEST FOR BEEP ---
+const testBeepBtn = document.getElementById('test-beep-btn');
+
+testBeepBtn.addEventListener('click', () => {
+    console.log('Test Beep button clicked.');
+    // Try to resume the audio context, just in case
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    // Play the beep immediately
+    playBeep(880);
+});
+
