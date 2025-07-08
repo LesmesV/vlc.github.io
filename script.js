@@ -102,11 +102,18 @@ function startTimer() {
         audioCtx.resume();
     }
     
-    if (timerInterval || workoutPlan.length === 0) return; // Don't start if already running or no exercises
+    if (timerInterval || workoutPlan.length === 0) return;
     
+    // Announce the start immediately
     speak(`Starting with ${workoutPlan[0].name}`);
+    
+    // Prepare the first exercise display
     startNextExercise();
-    timerInterval = setInterval(tick, 1000); // Run the 'tick' function every 1 second
+    
+    // Wait 500ms before starting the countdown to avoid audio conflict
+    setTimeout(() => {
+        timerInterval = setInterval(tick, 1000);
+    }, 500); // 500ms = half a second
 }
 
 // Function to pause the timer
