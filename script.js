@@ -17,6 +17,7 @@ let workoutPlan = []; // This will store our exercises {name, duration}
 let currentExerciseIndex = 0;
 let timeRemaining = 0;
 let timerInterval = null; // This will hold our setInterval function
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // --- 3. FUNCTIONS ---
 
@@ -48,9 +49,9 @@ function updateDisplay() {
     exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
 }
 
-// --- THIS IS THE 1ST CHANGE: A NEW playBeep FUNCTION ---
+// Your NEW function
 function playBeep(frequency) {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // The line that was here is now gone.
     const oscillator = audioCtx.createOscillator();
     
     oscillator.type = 'sine';
@@ -97,6 +98,10 @@ function startNextExercise() {
 
 // Main function to start the timer
 function startTimer() {
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    
     if (timerInterval || workoutPlan.length === 0) return; // Don't start if already running or no exercises
     
     speak(`Starting with ${workoutPlan[0].name}`);
