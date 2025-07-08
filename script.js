@@ -53,7 +53,7 @@ function tick() {
         updateDisplay();
 
         // Play a beep in the last 3 seconds
-        if (timeRemaining <= 3 && timeRemaining > 0) {
+        if (timeRemaining <= 3 && timeRemaining >= 0) {
             beepSound.play();
         }
     } else {
