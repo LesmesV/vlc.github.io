@@ -17,7 +17,6 @@ let workoutPlan = []; // This will store our exercises {name, duration}
 let currentExerciseIndex = 0;
 let timeRemaining = 0;
 let timerInterval = null; // This will hold our setInterval function
-const beepSound = new Audio('https://cdn.freesound.org/previews/573/573381_13112340-lq.mp3'); // A simple beep sound
 
 // --- 3. FUNCTIONS ---
 
@@ -49,25 +48,39 @@ function updateDisplay() {
     exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
 }
 
-// Function that runs every second
+// --- THIS IS THE 1ST CHANGE: A NEW playBeep FUNCTION ---
+function playBeep(frequency) {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime); 
+    
+    oscillator.connect(audioCtx.destination);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.15);
+}
+
+// --- THIS IS THE 2ND CHANGE: AN UPDATED tick FUNCTION ---
 function tick() {
     if (timeRemaining > 0) {
         timeRemaining--;
         updateDisplay();
 
-        // Play a beep in the last 3 seconds
-        if (timeRemaining <= 3 && timeRemaining >= 0) {
-            beepSound.play();
+        // Play standard beeps for the countdown (at 2 and 1 seconds left)
+        if (timeRemaining <= 3 && timeRemaining > 0) {
+            playBeep(880); // Standard pitch
         }
     } else {
+        // Timer just hit zero. Play the final, high-pitched beep.
+        playBeep(1200); // Higher pitch
+
         // Move to the next exercise or end workout
         currentExerciseIndex++;
         if (currentExerciseIndex < workoutPlan.length) {
-            // Announce the next exercise
             speak(`Next exercise: ${workoutPlan[currentExerciseIndex].name}`);
             startNextExercise();
         } else {
-            // End of workout
             clearInterval(timerInterval);
             timerInterval = null;
             speak("Workout complete!");
@@ -121,24 +134,18 @@ function saveWorkout() {
         return;
     }
 
-    // Get existing workouts from Local Storage, or create a new empty object
     const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
-
-    // Add the new workout
     allWorkouts[title] = workoutPlan;
-
-    // Save the updated object back to Local Storage
     localStorage.setItem('allMyWorkouts', JSON.stringify(allWorkouts));
 
     alert(`Workout "${title}" saved!`);
-    populateDropdown(); // Update the dropdown with the new workout
+    populateDropdown(); 
     workoutTitleInput.value = '';
 }
 
-// --- B. The Function to Load the Dropdown ---
 function populateDropdown() {
     const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
-    savedWorkoutsDropdown.innerHTML = '<option value="">--- Load a Saved Workout ---</option>'; // Reset dropdown
+    savedWorkoutsDropdown.innerHTML = '<option value="">--- Load a Saved Workout ---</option>';
 
     for (const title in allWorkouts) {
         const option = document.createElement('option');
@@ -148,30 +155,26 @@ function populateDropdown() {
     }
 }
 
-// --- C. The Function to Handle Selecting a Workout ---
 function loadSelectedWorkout() {
     const selectedTitle = savedWorkoutsDropdown.value;
     if (!selectedTitle) {
-        resetTimer(); // If they select the default, clear the plan
+        resetTimer(); 
         return;
     }
-
+    
     const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts'));
     const selectedPlan = allWorkouts[selectedTitle];
-
-    // Load the selected workout into the current plan
+    
     workoutPlan = selectedPlan;
-    currentExerciseIndex = 0; // Reset index
-
-    // Update the visual list on the screen
-    exerciseList.innerHTML = ''; // Clear the current list
+    currentExerciseIndex = 0; 
+    
+    exerciseList.innerHTML = ''; 
     workoutPlan.forEach(exercise => {
         const listItem = document.createElement('li');
         listItem.textContent = `${exercise.name} (${exercise.duration}s)`;
         exerciseList.appendChild(listItem);
     });
 
-    // Set the display to the first exercise of the loaded plan
     if(workoutPlan.length > 0) {
         timeRemaining = workoutPlan[0].duration;
         updateDisplay();
@@ -186,5 +189,5 @@ resetBtn.addEventListener('click', resetTimer);
 saveWorkoutBtn.addEventListener('click', saveWorkout);
 savedWorkoutsDropdown.addEventListener('change', loadSelectedWorkout);
 
-// Call this function when the page loads to fill the dropdown
 document.addEventListener('DOMContentLoaded', populateDropdown);
+
