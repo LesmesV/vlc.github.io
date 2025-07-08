@@ -64,17 +64,13 @@ function playBeep(frequency) {
 
 // --- THIS IS THE 2ND CHANGE: AN UPDATED tick FUNCTION ---
 function tick() {
-    if (timeRemaining > 0) {
-        timeRemaining--;
-        updateDisplay();
+    // Decrement the time immediately
+    timeRemaining--;
+    updateDisplay();
 
-        // Play standard beeps for the countdown (at 2 and 1 seconds left)
-        if (timeRemaining <= 3 && timeRemaining > 0) {
-            playBeep(880); // Standard pitch
-        }
-    } else {
-        // Timer just hit zero. Play the final, high-pitched beep.
-        playBeep(1200); // Higher pitch
+    // If the timer just hit zero
+    if (timeRemaining === 0) {
+        playBeep(1200); // Play the high-pitched beep immediately
 
         // Move to the next exercise or end workout
         currentExerciseIndex++;
@@ -87,6 +83,10 @@ function tick() {
             speak("Workout complete!");
             exerciseTitle.textContent = "Finished!";
         }
+    }
+    // If there's still time left, play the countdown beeps
+    else if (timeRemaining < 3 && timeRemaining > 0) {
+        playBeep(880); // Standard pitch
     }
 }
 
