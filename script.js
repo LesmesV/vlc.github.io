@@ -39,7 +39,11 @@ function updateDisplay() {
     const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
     const seconds = (timeRemaining % 60).toString().padStart(2, '0');
     countdownDisplay.textContent = `${minutes}:${seconds}`;
-    exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
+
+    // Ensure there's a valid exercise to display a title for
+    if (workoutPlan[currentExerciseIndex]) {
+        exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
+    }
 }
 
 function playBeep(frequency) {
@@ -52,48 +56,58 @@ function playBeep(frequency) {
 }
 
 function tick() {
-    // This function now correctly handles the timer logic without lag
-    timeRemaining--;
-    updateDisplay();
+    if (timeRemaining > 0) {
+        // Countdown beeps
+        if (timeRemaining <= 4 && timeRemaining > 1) { // Beeps when display is 3, 2, 1
+            playBeep(880); // Standard pitch
+        }
+        timeRemaining--;
+        updateDisplay();
+    } else {
+        // Timer hits zero
+        clearInterval(timerInterval); // Stop the current timer
+        timerInterval = null;
+        
+        playBeep(1200); // Play final high-pitched beep
 
-    if (timeRemaining === 0) {
-        playBeep(1200); // High-pitched beep at zero
-
+        // Move to the next exercise
         currentExerciseIndex++;
         if (currentExerciseIndex < workoutPlan.length) {
+            // Announce and start the next exercise after a short delay
             speak(`Next exercise: ${workoutPlan[currentExerciseIndex].name}`);
-            startNextExercise();
+            setTimeout(startTimer, 1000); // Start the next timer after 1 second
         } else {
-            clearInterval(timerInterval);
-            timerInterval = null;
+            // End of workout
             speak("Workout complete!");
             exerciseTitle.textContent = "Finished!";
         }
-    } else if (timeRemaining <= 3 && timeRemaining > 0) {
-        playBeep(880); // Standard countdown beeps
     }
 }
 
 function startNextExercise() {
-    timeRemaining = workoutPlan[currentExerciseIndex].duration;
-    updateDisplay();
+    if (workoutPlan[currentExerciseIndex]) {
+        timeRemaining = workoutPlan[currentExerciseIndex].duration;
+        updateDisplay();
+    }
 }
 
 function startTimer() {
-    // This function correctly resumes audio and adds the necessary delay
+    // Resume audio context if needed
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
-    
+
     if (timerInterval || workoutPlan.length === 0) return;
+
+    // Announce the start only for the very first exercise
+    if (currentExerciseIndex === 0 && timeRemaining === 0) {
+        speak(`Starting with ${workoutPlan[0].name}`);
+    }
     
-    speak(`Starting with ${workoutPlan[0].name}`);
     startNextExercise();
-    
-    // This setTimeout is crucial and was missing from your last file
-    setTimeout(() => {
-        timerInterval = setInterval(tick, 1000);
-    }, 500); // 500ms delay
+
+    // Start the timer interval
+    timerInterval = setInterval(tick, 1000);
 }
 
 function pauseTimer() {
@@ -107,6 +121,7 @@ function resetTimer() {
     workoutPlan = [];
     exerciseList.innerHTML = '';
     currentExerciseIndex = 0;
+    timeRemaining = 0; // Reset time
     exerciseTitle.textContent = "Ready?";
     countdownDisplay.textContent = "00:00";
 }
@@ -179,16 +194,3 @@ saveWorkoutBtn.addEventListener('click', saveWorkout);
 savedWorkoutsDropdown.addEventListener('change', loadSelectedWorkout);
 
 document.addEventListener('DOMContentLoaded', populateDropdown);
-
-// --- FINAL TEST FOR BEEP ---
-const testBeepBtn = document.getElementById('test-beep-btn');
-
-if (testBeepBtn) { // Check if the button exists before adding listener
-    testBeepBtn.addEventListener('click', () => {
-        console.log('Test Beep button clicked.');
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        playBeep(880);
-    });
-}
