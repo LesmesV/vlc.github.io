@@ -8,6 +8,9 @@ const addExerciseBtn = document.getElementById('add-exercise-btn');
 const exerciseInput = document.getElementById('exercise-input');
 const durationInput = document.getElementById('duration-input');
 const exerciseList = document.getElementById('exercise-list');
+const workoutTitleInput = document.getElementById('workout-title-input');
+const saveWorkoutBtn = document.getElementById('save-workout-btn');
+const savedWorkoutsDropdown = document.getElementById('saved-workouts-dropdown');
 
 // --- 2. WORKOUT DATA AND STATE ---
 let workoutPlan = []; // This will store our exercises {name, duration}
@@ -111,8 +114,77 @@ function speak(text) {
     speechSynthesis.speak(utterance);
 }
 
+function saveWorkout() {
+    const title = workoutTitleInput.value;
+    if (!title || workoutPlan.length === 0) {
+        alert("Please enter a title and add at least one exercise.");
+        return;
+    }
+
+    // Get existing workouts from Local Storage, or create a new empty object
+    const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
+
+    // Add the new workout
+    allWorkouts[title] = workoutPlan;
+
+    // Save the updated object back to Local Storage
+    localStorage.setItem('allMyWorkouts', JSON.stringify(allWorkouts));
+
+    alert(`Workout "${title}" saved!`);
+    populateDropdown(); // Update the dropdown with the new workout
+    workoutTitleInput.value = '';
+}
+
+// --- B. The Function to Load the Dropdown ---
+function populateDropdown() {
+    const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
+    savedWorkoutsDropdown.innerHTML = '<option value="">--- Load a Saved Workout ---</option>'; // Reset dropdown
+
+    for (const title in allWorkouts) {
+        const option = document.createElement('option');
+        option.value = title;
+        option.textContent = title;
+        savedWorkoutsDropdown.appendChild(option);
+    }
+}
+
+// --- C. The Function to Handle Selecting a Workout ---
+function loadSelectedWorkout() {
+    const selectedTitle = savedWorkoutsDropdown.value;
+    if (!selectedTitle) {
+        resetTimer(); // If they select the default, clear the plan
+        return;
+    }
+
+    const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts'));
+    const selectedPlan = allWorkouts[selectedTitle];
+
+    // Load the selected workout into the current plan
+    workoutPlan = selectedPlan;
+    currentExerciseIndex = 0; // Reset index
+
+    // Update the visual list on the screen
+    exerciseList.innerHTML = ''; // Clear the current list
+    workoutPlan.forEach(exercise => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${exercise.name} (${exercise.duration}s)`;
+        exerciseList.appendChild(listItem);
+    });
+
+    // Set the display to the first exercise of the loaded plan
+    if(workoutPlan.length > 0) {
+        timeRemaining = workoutPlan[0].duration;
+        updateDisplay();
+    }
+}
+
 // --- 4. EVENT LISTENERS (Connecting buttons to functions) ---
 addExerciseBtn.addEventListener('click', addExercise);
 startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', pauseTimer);
 resetBtn.addEventListener('click', resetTimer);
+saveWorkoutBtn.addEventListener('click', saveWorkout);
+savedWorkoutsDropdown.addEventListener('change', loadSelectedWorkout);
+
+// Call this function when the page loads to fill the dropdown
+document.addEventListener('DOMContentLoaded', populateDropdown);
