@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- 1. GETTING ELEMENTS FROM HTML ---
+    // --- ELEMENTS ---
     const exerciseTitle = document.getElementById('exercise-title');
     const countdownDisplay = document.getElementById('countdown');
     const startBtn = document.getElementById('start-btn');
@@ -14,14 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedWorkoutsDropdown = document.getElementById('saved-workouts-dropdown');
     const testBeepBtn = document.getElementById('test-beep-btn');
 
-    // --- 2. WORKOUT DATA AND STATE ---
+    // --- STATE ---
     let workoutPlan = [];
     let currentExerciseIndex = 0;
     let timeRemaining = 0;
     let timerInterval = null;
+    const PRE_START_DURATION = 15; // seconds
+    let preStartMode = false;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // --- 3. FUNCTIONS ---
+    // --- FUNCTIONS ---
 
     function addExercise() {
         const name = exerciseInput.value.trim();
@@ -36,19 +38,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderExerciseList() {
         exerciseList.innerHTML = '';
-        workoutPlan.forEach(exercise => {
+        workoutPlan.forEach((exercise, index) => {
             const listItem = document.createElement('li');
             listItem.textContent = `${exercise.name} (${exercise.duration}s)`;
+
+            const editBtn = document.createElement('button');
+            editBtn.textContent = "Edit";
+            editBtn.classList.add('edit-btn');
+            editBtn.onclick = () => editExercise(index);
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = "Delete";
+            delBtn.classList.add('delete-btn');
+            delBtn.onclick = () => deleteExercise(index);
+
+            listItem.appendChild(editBtn);
+            listItem.appendChild(delBtn);
+
             exerciseList.appendChild(listItem);
         });
+    }
+
+    function editExercise(index) {
+        const ex = workoutPlan[index];
+        exerciseInput.value = ex.name;
+        durationInput.value = ex.duration;
+        workoutPlan.splice(index, 1); // remove old entry
+        renderExerciseList();
+    }
+
+    function deleteExercise(index) {
+        workoutPlan.splice(index, 1);
+        renderExerciseList();
     }
 
     function updateDisplay() {
         const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
         const seconds = (timeRemaining % 60).toString().padStart(2, '0');
         countdownDisplay.textContent = `${minutes}:${seconds}`;
-        if (workoutPlan[currentExerciseIndex]) {
+        if (!preStartMode && workoutPlan[currentExerciseIndex]) {
             exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
+        } else if (preStartMode) {
+            exerciseTitle.textContent = "Get Ready!";
         }
     }
 
@@ -65,17 +96,30 @@ document.addEventListener("DOMContentLoaded", () => {
         timeRemaining--;
         updateDisplay();
 
-        // Announce next exercise 10 seconds before the end
+        if (preStartMode) {
+            if (timeRemaining === PRE_START_DURATION - 1) {
+                speak(`First exercise: ${workoutPlan[0].name}`);
+            }
+            if (timeRemaining <= 3 && timeRemaining > 0) {
+                playBeep(880);
+            }
+            if (timeRemaining === 0) {
+                playBeep(1200);
+                clearInterval(timerInterval);
+                preStartMode = false;
+                currentExerciseIndex = 0;
+                startTimer();
+            }
+            return;
+        }
+
+        // During exercises
         if (timeRemaining === 10 && currentExerciseIndex + 1 < workoutPlan.length) {
             speak(`Next exercise: ${workoutPlan[currentExerciseIndex + 1].name}`);
         }
-
-        // Final 3-second countdown beeps
         if (timeRemaining <= 3 && timeRemaining > 0) {
             playBeep(880);
         }
-
-        // End of exercise
         if (timeRemaining === 0) {
             playBeep(1200);
             clearInterval(timerInterval);
@@ -103,13 +147,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
-
         if (timerInterval || workoutPlan.length === 0) return;
 
+        // Pre-start countdown before first exercise
         if (currentExerciseIndex === 0 && timeRemaining === 0) {
-            speak(`Starting with ${workoutPlan[0].name}`);
+            preStartMode = true;
+            timeRemaining = PRE_START_DURATION;
+            updateDisplay();
+            timerInterval = setInterval(tick, 1000);
+            return;
         }
-        
+
         startNextExercise();
         timerInterval = setInterval(tick, 1000);
     }
@@ -122,16 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
+        preStartMode = false;
         currentExerciseIndex = 0;
-        if (workoutPlan.length > 0) {
-            timeRemaining = workoutPlan[0].duration;
-            updateDisplay();
-            exerciseTitle.textContent = "Ready?";
-        } else {
-            timeRemaining = 0;
-            exerciseTitle.textContent = "Ready?";
-            countdownDisplay.textContent = "00:00";
-        }
+        timeRemaining = 0;
+        exerciseTitle.textContent = "Ready?";
+        countdownDisplay.textContent = "00:00";
     }
 
     function speak(text) {
@@ -151,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('allMyWorkouts', JSON.stringify(allWorkouts));
         alert(`Workout "${title}" saved!`);
         populateDropdown();
-        workoutTitleInput.value = '';
     }
 
     function populateDropdown() {
@@ -173,15 +215,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts'));
         workoutPlan = [...allWorkouts[selectedTitle]];
+        workoutTitleInput.value = selectedTitle; // show title for editing
         currentExerciseIndex = 0;
         renderExerciseList();
         if (workoutPlan.length > 0) {
-            timeRemaining = workoutPlan[0].duration;
+            timeRemaining = 0;
             updateDisplay();
         }
     }
 
-    // --- 4. EVENT LISTENERS ---
+    // --- EVENT LISTENERS ---
     addExerciseBtn.addEventListener('click', addExercise);
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
@@ -189,12 +232,9 @@ document.addEventListener("DOMContentLoaded", () => {
     saveWorkoutBtn.addEventListener('click', saveWorkout);
     savedWorkoutsDropdown.addEventListener('change', loadSelectedWorkout);
     testBeepBtn.addEventListener('click', () => {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         playBeep(1000);
     });
 
-    // Initial population of saved workouts
     populateDropdown();
 });
