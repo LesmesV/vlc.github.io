@@ -1,57 +1,63 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: #121212;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh; 
-    margin: 0;
-    padding: 40px 0; 
-}
-
-#app-container {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #eee;
     text-align: center;
-    width: 90%;
-    max-width: 400px;
-}
-
-#timer-display h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-#timer-display p {
-    font-size: 4rem;
-    font-weight: bold;
     margin: 0;
+    padding: 0;
+}
+
+#app {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    color: #1db954;
+}
+
+#timer-area {
+    margin: 20px 0;
+}
+
+#countdown {
+    font-size: 4rem;
+    margin: 10px 0;
+    font-weight: bold;
 }
 
 #controls button {
-    font-size: 1rem;
+    margin: 5px;
     padding: 10px 20px;
-    margin: 10px;
-    border: 1px solid #1DB954;
-    background-color: #1DB954;
-    color: white;
-    border-radius: 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-#input-area {
-    margin-top: 30px;
-}
+#start-btn { background-color: #1db954; color: white; }
+#pause-btn { background-color: #f39c12; color: white; }
+#reset-btn { background-color: #e74c3c; color: white; }
+#test-beep-btn { background-color: #3498db; color: white; }
 
-#input-area input {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #555;
-    margin: 5px;
+#input-area {
+    margin-top: 20px;
+    padding: 15px;
+    background: #222;
+    border-radius: 10px;
 }
 
 #exercise-list {
-    list-style: none;
+    list-style-type: none;
     padding: 0;
     margin-top: 20px;
+}
+
+.note {
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-top: 5px;
 }
 
 #exercise-list li {
@@ -59,4 +65,19 @@ body {
     padding: 10px;
     margin-bottom: 5px;
     border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+
+#exercise-list button {
+    margin-left: 10px;
+    padding: 3px 8px;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.edit-btn { background-color: #1db954; color: white; }
+.delete-btn { background-color: #ff4444; color: white; }
