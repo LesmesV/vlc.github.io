@@ -4,10 +4,8 @@ body {
     color: #ffffff;
     display: flex;
     justify-content: center;
-    /* Let the page grow taller than the screen */
     min-height: 100vh; 
     margin: 0;
-    /* Add some space at the top and bottom */
     padding: 40px 0; 
 }
 
