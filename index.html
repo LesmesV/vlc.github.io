@@ -1,47 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Workout Timer</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-    <div id="app-container">
-        <div id="timer-display">
-            <h1 id="exercise-title">Ready?</h1>
-            <p id="countdown">00:00</p>
-        </div>
-
-        <div id="controls">
-            <button id="start-btn">Start</button>
-            <button id="pause-btn">Pause</button>
-            <button id="reset-btn">Reset</button>
-            <button id="test-beep-btn" style="background-color: #ff4500;">Test Beep</button>
-        </div>
-
-        <div id="input-area">
-            <div id="load-workout-area">
-                <select id="saved-workouts-dropdown">
-                    <option value="">--- Load a Saved Workout ---</option>
-                </select>
-            </div>
-            
-            <h2>Create Your Workout</h2>
-            <input type="text" id="exercise-input" placeholder="Exercise Name">
-            <input type="number" id="duration-input" placeholder="Duration (seconds)">
-            <button id="add-exercise-btn">Add Exercise</button>
-
-            <div id="save-workout-area">
-                <input type="text" id="workout-title-input" placeholder="Workout Title">
-                <button id="save-workout-btn">Save Workout</button>
-            </div>
-        </div>
-        
-        <ul id="exercise-list"></ul>
+<div id="input-area">
+    <div id="load-workout-area">
+        <select id="saved-workouts-dropdown">
+            <option value="">--- Load a Saved Workout ---</option>
+        </select>
     </div>
+    
+    <h2>Create Your Workout</h2>
+    <input type="text" id="exercise-input" placeholder="Exercise Name">
+    <input type="number" id="duration-input" placeholder="Duration (seconds)">
+    <button id="add-exercise-btn">Add Exercise</button>
+    <p class="note">⚠️ Exercises must be at least 10 seconds to allow announcements and countdowns.</p>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <div id="save-workout-area">
+        <input type="text" id="workout-title-input" placeholder="Workout Title">
+        <button id="save-workout-btn">Save Workout</button>
+    </div>
+</div>
