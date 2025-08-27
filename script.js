@@ -1,280 +1,151 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // --- ELEMENTS ---
-    const exerciseTitle = document.getElementById('exercise-title');
-    const countdownDisplay = document.getElementById('countdown');
-    const startBtn = document.getElementById('start-btn');
-    const pauseBtn = document.getElementById('pause-btn');
-    const resetBtn = document.getElementById('reset-btn');
-    const addExerciseBtn = document.getElementById('add-exercise-btn');
-    const exerciseInput = document.getElementById('exercise-input');
-    const durationInput = document.getElementById('duration-input');
-    const exerciseList = document.getElementById('exercise-list');
-    const workoutTitleInput = document.getElementById('workout-title-input');
-    const saveWorkoutBtn = document.getElementById('save-workout-btn');
-    const savedWorkoutsDropdown = document.getElementById('saved-workouts-dropdown');
-    const testBeepBtn = document.getElementById('test-beep-btn');
+// ===============================
+// Workout Timer Script
+// ===============================
 
-    // --- STATE ---
-    let workoutPlan = [];
-    let currentExerciseIndex = 0;
-    let timeRemaining = 0;
-    let timerInterval = null;
-    const PRE_START_DURATION = 15; // seconds before first exercise
-    let preStartMode = false;
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// Workout data
+let workoutPlan = [];
+let currentExerciseIndex = 0;
+let timer = null;
+let timeLeft = 0;
+let preStart = true;
 
-    // --- FUNCTIONS ---
+// Load saved workouts from localStorage
+let allMyWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
 
-    function addExercise() {
-        const name = exerciseInput.value.trim();
-        const duration = parseInt(durationInput.value, 10);
-        if (name && duration > 10) { // enforce >10s
-            workoutPlan.push({ name, duration });
-            renderExerciseList();
-            exerciseInput.value = '';
-            durationInput.value = '';
-        } else {
-            alert("Exercises must be at least 10 seconds long.");
-        }
-    }
+// ===============================
+// DOM Elements
+const workoutList = document.getElementById('workout-list');
+const exerciseNameInput = document.getElementById('exercise-name-input');
+const exerciseDurationInput = document.getElementById('exercise-duration-input');
+const addExerciseBtn = document.getElementById('add-exercise-btn');
+const timerDisplay = document.getElementById('timer-display');
+const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('pause-btn');
+const resetBtn = document.getElementById('reset-btn');
+const testBeepBtn = document.getElementById('test-beep-btn');
+const workoutTitleInput = document.getElementById('workout-title-input');
+const saveWorkoutBtn = document.getElementById('save-workout-btn');
+const savedWorkoutsDropdown = document.getElementById('saved-workouts');
 
-    function renderExerciseList() {
-        exerciseList.innerHTML = '';
-        workoutPlan.forEach((exercise, index) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${exercise.name} (${exercise.duration}s)`;
+// ===============================
+// Audio Context
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            // Button container
-            const actions = document.createElement('div');
-            actions.classList.add('exercise-actions');
+// ===============================
+// Helper Functions
+function createBeep(duration = 200, frequency = 880) {
+    const oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = frequency;
+    oscillator.connect(audioCtx.destination);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + duration / 1000);
+}
 
-            // Edit button
-            const editBtn = document.createElement('button');
-            editBtn.textContent = "Edit";
-            editBtn.classList.add('edit-btn');
-            editBtn.onclick = () => editExercise(index);
-
-            // Delete button
-            const delBtn = document.createElement('button');
-            delBtn.textContent = "Delete";
-            delBtn.classList.add('delete-btn');
-            delBtn.onclick = () => deleteExercise(index);
-
-            // Up button
-            const upBtn = document.createElement('button');
-            upBtn.textContent = "↑";
-            upBtn.classList.add('up-btn');
-            upBtn.onclick = () => moveExerciseUp(index);
-            if (index === 0) upBtn.disabled = true; // disable at top
-
-            // Down button
-            const downBtn = document.createElement('button');
-            downBtn.textContent = "↓";
-            downBtn.classList.add('down-btn');
-            downBtn.onclick = () => moveExerciseDown(index);
-            if (index === workoutPlan.length - 1) downBtn.disabled = true; // disable at bottom
-
-            // Append buttons
-            actions.appendChild(editBtn);
-            actions.appendChild(delBtn);
-            actions.appendChild(upBtn);
-            actions.appendChild(downBtn);
-
-            listItem.appendChild(actions);
-            exerciseList.appendChild(listItem);
-        });
-    }
-
-    function editExercise(index) {
-        const ex = workoutPlan[index];
-        exerciseInput.value = ex.name;
-        durationInput.value = ex.duration;
-        workoutPlan.splice(index, 1); // remove old entry
-        renderExerciseList();
-    }
-
-    function deleteExercise(index) {
-        workoutPlan.splice(index, 1);
-        renderExerciseList();
-    }
-
-    function moveExerciseUp(index) {
-        if (index > 0) {
-            [workoutPlan[index - 1], workoutPlan[index]] = [workoutPlan[index], workoutPlan[index - 1]];
-            renderExerciseList();
-        }
-    }
-
-    function moveExerciseDown(index) {
-        if (index < workoutPlan.length - 1) {
-            [workoutPlan[index + 1], workoutPlan[index]] = [workoutPlan[index], workoutPlan[index + 1]];
-            renderExerciseList();
-        }
-    }
-
-    function updateDisplay() {
-        const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
-        const seconds = (timeRemaining % 60).toString().padStart(2, '0');
-        countdownDisplay.textContent = `${minutes}:${seconds}`;
-        if (!preStartMode && workoutPlan[currentExerciseIndex]) {
-            exerciseTitle.textContent = workoutPlan[currentExerciseIndex].name;
-        } else if (preStartMode) {
-            exerciseTitle.textContent = "Get Ready!";
-        }
-    }
-
-    function playBeep(frequency) {
-        const oscillator = audioCtx.createOscillator();
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-        oscillator.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.15);
-    }
-
-    function tick() {
-        timeRemaining--;
-        updateDisplay();
-
-        if (preStartMode) {
-            if (timeRemaining === PRE_START_DURATION - 1) {
-                speak(`First exercise: ${workoutPlan[0].name}`);
-            }
-            if (timeRemaining <= 3 && timeRemaining > 0) {
-                playBeep(880);
-            }
-            if (timeRemaining === 0) {
-                playBeep(1200);
-                clearInterval(timerInterval);
-                preStartMode = false;
-                currentExerciseIndex = 0;
-                startTimer();
-            }
-            return;
-        }
-
-        // During exercises
-        if (timeRemaining === 10 && currentExerciseIndex + 1 < workoutPlan.length) {
-            speak(`Next exercise: ${workoutPlan[currentExerciseIndex + 1].name}`);
-        }
-        if (timeRemaining <= 3 && timeRemaining > 0) {
-            playBeep(880);
-        }
-        if (timeRemaining === 0) {
-            playBeep(1200);
-            clearInterval(timerInterval);
-            timerInterval = null;
-            currentExerciseIndex++;
-            if (currentExerciseIndex < workoutPlan.length) {
-                setTimeout(startTimer, 1000);
-            } else {
-                speak("Workout complete!");
-                exerciseTitle.textContent = "Finished!";
-                currentExerciseIndex = 0;
-                timeRemaining = 0;
-            }
-        }
-    }
-
-    function startNextExercise() {
-        if (workoutPlan[currentExerciseIndex]) {
-            timeRemaining = workoutPlan[currentExerciseIndex].duration;
-            updateDisplay();
-        }
-    }
-
-    function startTimer() {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        if (timerInterval || workoutPlan.length === 0) return;
-
-        // Pre-start countdown before first exercise
-        if (currentExerciseIndex === 0 && timeRemaining === 0) {
-            preStartMode = true;
-            timeRemaining = PRE_START_DURATION;
-            updateDisplay();
-            timerInterval = setInterval(tick, 1000);
-            return;
-        }
-
-        startNextExercise();
-        timerInterval = setInterval(tick, 1000);
-    }
-
-    function pauseTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-
-    function resetTimer() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        preStartMode = false;
-        currentExerciseIndex = 0;
-        timeRemaining = 0;
-        exerciseTitle.textContent = "Ready?";
-        countdownDisplay.textContent = "00:00";
-    }
-
-    function speak(text) {
+function speak(text) {
+    if ('speechSynthesis' in window) {
         speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        speechSynthesis.speak(utterance);
+        window.speechSynthesis.speak(utterance);
     }
+}
 
-    function saveWorkout() {
-        const title = workoutTitleInput.value.trim();
-        if (!title || workoutPlan.length === 0) {
-            alert("Please enter a title and add at least one exercise.");
-            return;
-        }
-        const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
-        allWorkouts[title] = workoutPlan;
-        localStorage.setItem('allMyWorkouts', JSON.stringify(allWorkouts));
-        alert(`Workout "${title}" saved!`);
-        populateDropdown();
-    }
+// ===============================
+// Render Workout List
+function renderWorkout() {
+    workoutList.innerHTML = '';
+    workoutPlan.forEach((exercise, index) => {
+        const li = document.createElement('li');
+        li.className = 'exercise-item';
 
-    function populateDropdown() {
-        const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
-        savedWorkoutsDropdown.innerHTML = '<option value="">--- Load a Saved Workout ---</option>';
-        for (const title in allWorkouts) {
-            const option = document.createElement('option');
-            option.value = title;
-            option.textContent = title;
-            savedWorkoutsDropdown.appendChild(option);
-        }
-    }
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'exercise-name';
+        nameSpan.textContent = `${exercise.name} (${exercise.duration}s)`;
 
-    function loadSelectedWorkout() {
-        const selectedTitle = savedWorkoutsDropdown.value;
-        if (!selectedTitle) {
-            resetTimer();
-            return;
-        }
-        const allWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts'));
-        workoutPlan = [...allWorkouts[selectedTitle]];
-        workoutTitleInput.value = selectedTitle; // show title for editing
-        currentExerciseIndex = 0;
-        renderExerciseList();
-        if (workoutPlan.length > 0) {
-            timeRemaining = 0;
-            updateDisplay();
-        }
-    }
+        const btnContainer = document.createElement('div');
 
-    // --- EVENT LISTENERS ---
-    addExerciseBtn.addEventListener('click', addExercise);
-    startBtn.addEventListener('click', startTimer);
-    pauseBtn.addEventListener('click', pauseTimer);
-    resetBtn.addEventListener('click', resetTimer);
-    saveWorkoutBtn.addEventListener('click', saveWorkout);
-    savedWorkoutsDropdown.addEventListener('change', loadSelectedWorkout);
-    testBeepBtn.addEventListener('click', () => {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        playBeep(1000);
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => {
+            exerciseNameInput.value = exercise.name;
+            exerciseDurationInput.value = exercise.duration;
+            workoutPlan.splice(index, 1);
+            renderWorkout();
+        };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => {
+            workoutPlan.splice(index, 1);
+            renderWorkout();
+        };
+
+        const upBtn = document.createElement('button');
+        upBtn.className = 'up-btn';
+        upBtn.textContent = '↑';
+        upBtn.disabled = index === 0;
+        upBtn.onclick = () => {
+            [workoutPlan[index - 1], workoutPlan[index]] = [workoutPlan[index], workoutPlan[index - 1]];
+            renderWorkout();
+        };
+
+        const downBtn = document.createElement('button');
+        downBtn.className = 'down-btn';
+        downBtn.textContent = '↓';
+        downBtn.disabled = index === workoutPlan.length - 1;
+        downBtn.onclick = () => {
+            [workoutPlan[index + 1], workoutPlan[index]] = [workoutPlan[index], workoutPlan[index + 1]];
+            renderWorkout();
+        };
+
+        btnContainer.append(editBtn, deleteBtn, upBtn, downBtn);
+        li.append(nameSpan, btnContainer);
+        workoutList.appendChild(li);
     });
+}
 
-    populateDropdown();
+// ===============================
+// Add Exercise
+addExerciseBtn.addEventListener('click', () => {
+    const name = exerciseNameInput.value.trim();
+    const duration = parseInt(exerciseDurationInput.value);
+    if (!name || isNaN(duration) || duration < 10) {
+        alert('Please enter a valid name and duration ≥ 10s.');
+        return;
+    }
+    workoutPlan.push({ name, duration });
+    exerciseNameInput.value = '';
+    exerciseDurationInput.value = '';
+    renderWorkout();
 });
+
+// ===============================
+// Save Workout
+function updateSavedWorkoutsDropdown() {
+    savedWorkoutsDropdown.innerHTML = '<option value="">-- Load Saved Workout --</option>';
+    Object.keys(allMyWorkouts).forEach(title => {
+        const option = document.createElement('option');
+        option.value = title;
+        option.textContent = title;
+        savedWorkoutsDropdown.appendChild(option);
+    });
+}
+
+saveWorkoutBtn.addEventListener('click', () => {
+    const title = workoutTitleInput.value.trim();
+    if (!title) {
+        alert('Please provide a workout title.');
+        return;
+    }
+    allMyWorkouts[title] = workoutPlan;
+    localStorage.setItem('allMyWorkouts', JSON.stringify(allMyWorkouts));
+    updateSavedWorkoutsDropdown();
+    alert('Workout saved!');
+});
+
+// ===============================
+// Load Workout
+savedWorkoutsDropdown.addEventListener('change', () => {
+    const title = savedWorkou
