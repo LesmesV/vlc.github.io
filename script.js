@@ -9,8 +9,18 @@ let timer = null;
 let timeLeft = 0;
 let preStart = true;
 
-// Load saved workouts from localStorage
+// Load saved workouts with backward compatibility
+let oldWorkouts = JSON.parse(localStorage.getItem('workouts')) || [];
 let allMyWorkouts = JSON.parse(localStorage.getItem('allMyWorkouts')) || {};
+
+// Migrate old workouts if needed
+if (oldWorkouts.length && Object.keys(allMyWorkouts).length === 0) {
+    oldWorkouts.forEach(w => {
+        allMyWorkouts[w.title] = w.exercises;
+    });
+    localStorage.setItem('allMyWorkouts', JSON.stringify(allMyWorkouts));
+    localStorage.removeItem('workouts'); // optional: clean old key
+}
 
 // ===============================
 // DOM Elements
@@ -148,4 +158,92 @@ saveWorkoutBtn.addEventListener('click', () => {
 // ===============================
 // Load Workout
 savedWorkoutsDropdown.addEventListener('change', () => {
-    const title = savedWorkou
+    const title = savedWorkoutsDropdown.value;
+    if (!title) return;
+    workoutPlan = JSON.parse(JSON.stringify(allMyWorkouts[title]));
+    workoutTitleInput.value = title;
+    renderWorkout();
+});
+
+// ===============================
+// Timer Logic
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const seconds = (timeLeft % 60).toString().padStart(2, '0');
+    timerDisplay.textContent = `${minutes}:${seconds}`;
+}
+
+function startTimer() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    if (!workoutPlan.length) {
+        alert('Please add exercises first!');
+        return;
+    }
+
+    if (preStart) {
+        timeLeft = 15; // pre-start countdown
+        speak(`First exercise: ${workoutPlan[0].name}`);
+        preStart = false;
+    } else if (currentExerciseIndex < workoutPlan.length) {
+        timeLeft = workoutPlan[currentExerciseIndex].duration;
+    } else {
+        timerDisplay.textContent = 'Finished!';
+        speak('Workout complete!');
+        return;
+    }
+
+    timer = setInterval(() => {
+        updateTimerDisplay();
+
+        if (timeLeft === 10 && currentExerciseIndex < workoutPlan.length - 1) {
+            speak(`Next: ${workoutPlan[currentExerciseIndex + 1].name}`);
+        }
+
+        if ([3, 2, 1].includes(timeLeft)) {
+            createBeep(200, 880);
+        }
+
+        if (timeLeft <= 0) {
+            createBeep(500, 1200);
+            clearInterval(timer);
+            currentExerciseIndex++;
+            if (currentExerciseIndex < workoutPlan.length) {
+                startTimer();
+            } else {
+                timerDisplay.textContent = 'Finished!';
+                speak('Workout complete!');
+                preStart = true;
+                currentExerciseIndex = 0;
+            }
+        }
+
+        timeLeft--;
+    }, 1000);
+}
+
+function pauseTimer() {
+    clearInterval(timer);
+}
+
+function resetTimer() {
+    clearInterval(timer);
+    currentExerciseIndex = 0;
+    preStart = true;
+    timerDisplay.textContent = 'Ready?';
+}
+
+// ===============================
+// Button Event Listeners
+startBtn.addEventListener('click', startTimer);
+pauseBtn.addEventListener('click', pauseTimer);
+resetBtn.addEventListener('click', resetTimer);
+testBeepBtn.addEventListener('click', () => {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    createBeep();
+});
+
+// ===============================
+// Initial Setup
+updateSavedWorkoutsDropdown();
+renderWorkout();
