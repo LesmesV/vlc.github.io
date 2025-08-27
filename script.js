@@ -224,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- EVENT LISTENERS ---
+    // --- EVENT LISTENERS --
     addExerciseBtn.addEventListener('click', addExercise);
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
@@ -238,3 +238,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     populateDropdown();
 });
+
