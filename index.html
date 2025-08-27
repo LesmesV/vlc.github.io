@@ -1,49 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Workout Timer</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Timer</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <h1>Workout Timer</h1>
+    <div id="workout-container">
+        <h1>Workout Timer</h1>
 
-    <div id="timer-area">
-      <h2 id="exercise-title">Ready?</h2>
-      <div id="countdown">00:00</div>
+        <!-- Timer Display -->
+        <div id="timer-display">Ready?</div>
+
+        <!-- Timer Controls -->
+        <div id="timer-controls">
+            <button id="start-btn">Start</button>
+            <button id="pause-btn">Pause</button>
+            <button id="reset-btn">Reset</button>
+            <button id="test-beep-btn">Test Beep</button>
+        </div>
+
+        <hr>
+
+        <!-- Add Exercise Form -->
+        <div id="exercise-form">
+            <input type="text" id="exercise-name-input" placeholder="Exercise Name">
+            <input type="number" id="exercise-duration-input" placeholder="Duration (s)" min="10">
+            <button id="add-exercise-btn">Add Exercise</button>
+        </div>
+
+        <!-- Workout List -->
+        <ul id="workout-list">
+            <!-- Dynamic exercise items inserted here -->
+        </ul>
+
+        <hr>
+
+        <!-- Save / Load Workouts -->
+        <div id="save-load-workout">
+            <input type="text" id="workout-title-input" placeholder="Workout Title">
+            <button id="save-workout-btn">Save Workout</button>
+            <select id="saved-workouts">
+                <option value="">-- Load Saved Workout --</option>
+            </select>
+        </div>
     </div>
 
-    <div id="controls">
-      <button id="start-btn">Start</button>
-      <button id="pause-btn">Pause</button>
-      <button id="reset-btn">Reset</button>
-      <button id="test-beep-btn">Test Beep</button>
-    </div>
-
-    <div id="input-area">
-      <div id="load-workout-area">
-        <select id="saved-workouts-dropdown">
-          <option value="">--- Load a Saved Workout ---</option>
-        </select>
-      </div>
-      
-      <h2>Create Your Workout</h2>
-      <input type="text" id="exercise-input" placeholder="Exercise Name">
-      <input type="number" id="duration-input" placeholder="Duration (seconds)">
-      <button id="add-exercise-btn">Add Exercise</button>
-      <p class="note">⚠️ Exercises must be at least 10 seconds to allow announcements and countdowns.</p>
-
-      <div id="save-workout-area">
-        <input type="text" id="workout-title-input" placeholder="Workout Title">
-        <button id="save-workout-btn">Save Workout</button>
-      </div>
-    </div>
-
-    <ul id="exercise-list"></ul>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
