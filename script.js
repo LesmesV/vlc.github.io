@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentExerciseIndex = 0;
     let timeRemaining = 0;
     let timerInterval = null;
-    const PRE_START_DURATION = 15; // seconds
+    const PRE_START_DURATION = 15; // seconds before first exercise
     let preStartMode = false;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -28,11 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function addExercise() {
         const name = exerciseInput.value.trim();
         const duration = parseInt(durationInput.value, 10);
-        if (name && duration > 0) {
+        if (name && duration > 10) { // enforce >10s
             workoutPlan.push({ name, duration });
             renderExerciseList();
             exerciseInput.value = '';
             durationInput.value = '';
+        } else {
+            alert("Exercises must be at least 10 seconds long.");
         }
     }
 
@@ -42,19 +44,43 @@ document.addEventListener("DOMContentLoaded", () => {
             const listItem = document.createElement('li');
             listItem.textContent = `${exercise.name} (${exercise.duration}s)`;
 
+            // Button container
+            const actions = document.createElement('div');
+            actions.classList.add('exercise-actions');
+
+            // Edit button
             const editBtn = document.createElement('button');
             editBtn.textContent = "Edit";
             editBtn.classList.add('edit-btn');
             editBtn.onclick = () => editExercise(index);
 
+            // Delete button
             const delBtn = document.createElement('button');
             delBtn.textContent = "Delete";
             delBtn.classList.add('delete-btn');
             delBtn.onclick = () => deleteExercise(index);
 
-            listItem.appendChild(editBtn);
-            listItem.appendChild(delBtn);
+            // Up button
+            const upBtn = document.createElement('button');
+            upBtn.textContent = "↑";
+            upBtn.classList.add('up-btn');
+            upBtn.onclick = () => moveExerciseUp(index);
+            if (index === 0) upBtn.disabled = true; // disable at top
 
+            // Down button
+            const downBtn = document.createElement('button');
+            downBtn.textContent = "↓";
+            downBtn.classList.add('down-btn');
+            downBtn.onclick = () => moveExerciseDown(index);
+            if (index === workoutPlan.length - 1) downBtn.disabled = true; // disable at bottom
+
+            // Append buttons
+            actions.appendChild(editBtn);
+            actions.appendChild(delBtn);
+            actions.appendChild(upBtn);
+            actions.appendChild(downBtn);
+
+            listItem.appendChild(actions);
             exerciseList.appendChild(listItem);
         });
     }
@@ -70,6 +96,20 @@ document.addEventListener("DOMContentLoaded", () => {
     function deleteExercise(index) {
         workoutPlan.splice(index, 1);
         renderExerciseList();
+    }
+
+    function moveExerciseUp(index) {
+        if (index > 0) {
+            [workoutPlan[index - 1], workoutPlan[index]] = [workoutPlan[index], workoutPlan[index - 1]];
+            renderExerciseList();
+        }
+    }
+
+    function moveExerciseDown(index) {
+        if (index < workoutPlan.length - 1) {
+            [workoutPlan[index + 1], workoutPlan[index]] = [workoutPlan[index], workoutPlan[index + 1]];
+            renderExerciseList();
+        }
     }
 
     function updateDisplay() {
@@ -224,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- EVENT LISTENERS --
+    // --- EVENT LISTENERS ---
     addExerciseBtn.addEventListener('click', addExercise);
     startBtn.addEventListener('click', startTimer);
     pauseBtn.addEventListener('click', pauseTimer);
@@ -238,4 +278,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     populateDropdown();
 });
-
