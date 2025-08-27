@@ -1,83 +1,144 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #111;
-    color: #eee;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-}
+/* ===============================
+   Workout Timer Website Styles
+   Color Palette:
+   Background: #354024
+   Text: #4C3D19
+   Accent/Secondary: #CFBB99
+   Buttons: #889063
+   Button Hover: #E5D7C4
+   =============================== */
 
-#app {
-    max-width: 600px;
-    margin: 0 auto;
+/* General Body */
+body {
+    background-color: #354024;
+    color: #4C3D19;
+    font-family: Arial, sans-serif;
+    margin: 0;
     padding: 20px;
 }
 
-h1 {
-    color: #1db954;
+/* Header */
+h1, h2, h3 {
+    color: #CFBB99;
+    margin-bottom: 15px;
 }
 
-#timer-area {
-    margin: 20px 0;
-}
-
-#countdown {
-    font-size: 4rem;
-    margin: 10px 0;
+/* Timer Display */
+#timer-display {
+    font-size: 2em;
     font-weight: bold;
+    color: #CFBB99;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-#controls button {
-    margin: 5px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+/* Workout Container */
+#workout-container {
+    max-width: 600px;
+    margin: auto;
 }
 
-#start-btn { background-color: #1db954; color: white; }
-#pause-btn { background-color: #f39c12; color: white; }
-#reset-btn { background-color: #e74c3c; color: white; }
-#test-beep-btn { background-color: #3498db; color: white; }
-
-#input-area {
-    margin-top: 20px;
-    padding: 15px;
-    background: #222;
+/* Exercise List Items */
+.exercise-item {
+    background-color: #CFBB99;
     border-radius: 10px;
-}
-
-#exercise-list {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 20px;
-}
-
-.note {
-    font-size: 0.9rem;
-    color: #bbb;
-    margin-top: 5px;
-}
-
-#exercise-list li {
-    background-color: #333;
     padding: 10px;
-    margin-bottom: 5px;
-    border-radius: 5px;
+    margin: 8px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-#exercise-list button {
-    margin-left: 10px;
-    padding: 3px 8px;
-    font-size: 0.8rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+/* Exercise Name & Duration */
+.exercise-name {
+    font-weight: bold;
+    color: #4C3D19;
 }
 
-.edit-btn { background-color: #1db954; color: white; }
-.delete-btn { background-color: #ff4444; color: white; }
+/* Buttons */
+button {
+    background-color: #889063;
+    color: #4C3D19;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Button Hover */
+button:hover {
+    background-color: #E5D7C4;
+    color: #354024;
+}
+
+/* Specific Buttons */
+.edit-btn {
+    background-color: #889063;
+}
+
+.delete-btn {
+    background-color: #CFBB99;
+    color: #4C3D19;
+}
+
+.up-btn, .down-btn {
+    background-color: #889063;
+}
+
+.up-btn:hover, .down-btn:hover {
+    background-color: #E5D7C4;
+    color: #354024;
+}
+
+/* Form Inputs */
+input[type="text"], input[type="number"], select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #4C3D19;
+    margin-right: 10px;
+}
+
+/* Save Workout Section */
+#save-workout-btn {
+    background-color: #889063;
+    color: #4C3D19;
+    font-weight: bold;
+}
+
+#save-workout-btn:hover {
+    background-color: #E5D7C4;
+    color: #354024;
+}
+
+/* Dropdown for Saved Workouts */
+#saved-workouts {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #4C3D19;
+}
+
+/* Timer Controls Buttons */
+#start-btn, #pause-btn, #reset-btn, #test-beep-btn {
+    background-color: #889063;
+    color: #4C3D19;
+    font-weight: bold;
+}
+
+#start-btn:hover, #pause-btn:hover, #reset-btn:hover, #test-beep-btn:hover {
+    background-color: #E5D7C4;
+    color: #354024;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .exercise-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    button {
+        margin: 5px 0 0 0;
+    }
+}
