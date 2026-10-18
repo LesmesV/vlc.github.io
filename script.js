@@ -1,4 +1,6 @@
 'use strict';
+
+// SETUP: shared constants and references to the controls in index.html.
 const $ = id => document.getElementById(id);
 const STORAGE_KEY = 'allMyWorkouts';
 const CLOUD_CONFIG = {
@@ -48,6 +50,7 @@ let cloudUser = null;
 let cloudReady = false;
 let cloudSaveTimeout = null;
 
+// LOCAL STORAGE: load saved workouts from this browser; also migrate older saved data if present.
 function readSavedWorkouts() {
   try {
     const rawCurrent = localStorage.getItem(STORAGE_KEY);
@@ -67,6 +70,7 @@ function readSavedWorkouts() {
     return {};
   }
 }
+// STATUS AND SAVING: show messages, save locally, and refresh the saved-workout dropdown.
 function setStatus(message, type) {
   status.textContent = message;
   status.dataset.type = type || '';
@@ -88,6 +92,7 @@ function refreshSavedList() {
   Object.keys(savedWorkouts).sort((a, b) => a.localeCompare(b)).forEach(title => savedSelect.add(new Option(title, title)));
   if (Object.prototype.hasOwnProperty.call(savedWorkouts, selected)) savedSelect.value = selected;
 }
+// AUDIO CUES: create browser audio, play countdown beeps, and speak the next exercise name.
 function ensureAudio() {
   const Audio = window.AudioContext || window.webkitAudioContext;
   if (!Audio) return null;
@@ -122,6 +127,7 @@ function speak(text) {
     window.speechSynthesis.speak(utterance);
   } catch (error) { console.warn('Speech failed', error); }
 }
+// DISPLAY HELPERS: format the timer and create buttons with their click actions.
 function formatTime(seconds) {
   const whole = Math.max(0, Math.ceil(seconds));
   return String(Math.floor(whole / 60)).padStart(2, '0') + ':' + String(whole % 60).padStart(2, '0');
@@ -134,6 +140,7 @@ function button(label, className, callback) {
   el.addEventListener('click', callback);
   return el;
 }
+// EXERCISE LIST: redraw the list and attach edit, delete, and move controls to each exercise.
 function renderWorkout() {
   workoutList.replaceChildren();
   if (!workoutPlan.length) {
@@ -200,6 +207,7 @@ function moveExercise(index, direction) {
   [workoutPlan[index], workoutPlan[next]] = [workoutPlan[next], workoutPlan[index]];
   renderWorkout();
 }
+// TIMER ENGINE: update the countdown, start exercises, manage pauses, and finish/reset a workout.
 function updateDisplay(seconds, label) {
   timerDisplay.textContent = formatTime(seconds);
   timerDisplay.classList.toggle('is-countdown', phase === 'preparation');
@@ -368,7 +376,7 @@ testBeepBtn.addEventListener('click', () => {
   setStatus('Test beep played. If you could not hear it, check your device volume.');
 });
 
-// Cloud sync is optional until Firebase project settings are added below.
+// FIREBASE CLOUD SYNC: authenticate users and store each user's workouts in their own Firestore document.
 function setCloudControls(enabled) {
   [emailInput, passwordInput, signInBtn, createAccountBtn].forEach(control => control.disabled = !enabled);
 }
@@ -449,6 +457,7 @@ async function saveCloudWorkouts() {
     setStatus('Saved on this device, but cloud sync failed. Check your connection and Firebase rules.', 'error');
   }
 }
+// ACCOUNT MESSAGES: turn Firebase error codes into plain-language explanations.
 function authErrorMessage(error) {
   const messages = {
     'auth/invalid-email': 'That email address does not look valid.',
@@ -489,6 +498,7 @@ signOutBtn.addEventListener('click', async () => {
     catch (error) { setStatus('Could not sign out. Please try again.', 'error'); }
   }
 });
+// STARTUP: connect button actions, enable Firebase if configured, and render saved workouts.
 function init() {
   refreshSavedList();
   renderWorkout();
