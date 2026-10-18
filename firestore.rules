@@ -1,3 +1,4 @@
+// FIRESTORE SECURITY: only signed-in users can read or write data stored under their own user ID.
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
