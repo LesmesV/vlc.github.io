@@ -1,145 +1,74 @@
-/* ===============================
-   Workout Timer Website Styles
-   Color Palette:
-   Background: #354024
-   Text: #4C3D19
-   Accent/Secondary: #CFBB99
-   Buttons: #889063
-   Button Hover: #E5D7C4
-   =============================== */
-
-/* General Body */
-body {
-    background-color: #354024;
-    color: #4C3D19;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
+:root{--forest:#354024;--olive:#889063;--sand:#CFBB99;--cream:#E5D7C4;--ink:#4C3D19;--paper:#f3ecdf;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:clamp(16px,4vw,42px) 16px 32px;background:var(--forest);color:var(--ink)}
+button,input,select{font:inherit}
+button{min-height:42px;padding:10px 14px;border:1px solid transparent;border-radius:10px;background:var(--olive);color:#17200f;font-weight:650;cursor:pointer;transition:background-color .16s ease,transform .16s ease,opacity .16s ease}
+button:hover:not(:disabled){background:var(--cream);transform:translateY(-1px)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sand);outline-offset:3px}
+button:disabled{opacity:.45;cursor:not-allowed}
+#workout-container{width:min(100%,760px);margin:0 auto}
+.page-header{padding:10px 4px 22px}
+.eyebrow{margin:0 0 8px;color:var(--olive);font-size:.72rem;font-weight:800;letter-spacing:.16em}
+.page-header .eyebrow{color:var(--sand)}
+h1,h2,p{margin-top:0}
+h1{margin-bottom:8px;color:var(--cream);font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.045em;line-height:1.05}
+h2{margin-bottom:0;color:var(--ink);font-size:clamp(1.25rem,3vw,1.6rem);letter-spacing:-.025em}
+.intro{margin-bottom:0;color:#e2d8c8;line-height:1.6}
+.timer-card{padding:clamp(20px,5vw,34px);border:1px solid rgba(229,215,196,.14);border-radius:24px;background:#26301b;color:var(--cream);box-shadow:0 16px 38px rgba(0,0,0,.14);text-align:center}
+.timer-label{margin-bottom:4px;color:var(--sand);font-size:.72rem;font-weight:800;letter-spacing:.15em}
+#timer-display{color:var(--cream);font-size:clamp(3.4rem,13vw,6.2rem);font-variant-numeric:tabular-nums;font-weight:750;letter-spacing:-.065em;line-height:1.15}
+#timer-display.is-countdown{color:var(--sand)}
+#current-exercise{min-height:1.5em;margin:8px 0 20px;color:#e3d8c6;font-size:1rem}
+.progress-track{width:100%;height:7px;overflow:hidden;margin-bottom:22px;border-radius:99px;background:rgba(229,215,196,.15)}
+#timer-progress{width:0;height:100%;border-radius:inherit;background:var(--olive);transition:width .1s linear}
+#timer-controls{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+#timer-controls .primary-btn{min-width:150px;background:var(--sand)}
+#timer-controls .primary-btn:hover:not(:disabled){background:var(--cream)}
+#timer-controls .quiet-btn{background:transparent;border-color:rgba(229,215,196,.25);color:var(--cream)}
+#timer-controls .quiet-btn:hover:not(:disabled){color:var(--forest)}
+.timer-hint{max-width:520px;margin:18px auto 0;color:#c9c8b7;font-size:.83rem;line-height:1.55}
+#status-message{min-height:1.4em;margin:14px 4px 22px;color:var(--cream);font-size:.9rem;line-height:1.5}
+#status-message[data-type="error"]{color:#ffd0c4}
+.panel{margin-top:18px;padding:clamp(18px,4vw,28px);border-radius:18px;background:var(--paper)}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
+.section-note{color:#6e684f;font-size:.76rem;text-align:right}
+.exercise-form{display:grid;grid-template-columns:minmax(0,1fr) 145px auto;align-items:end;gap:10px}
+.field{display:flex;min-width:0;flex-direction:column;gap:7px;color:#625a43;font-size:.8rem;font-weight:700}
+input,select{width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid #c7b99f;border-radius:10px;background:#fffaf2;color:var(--ink)}
+input::placeholder{color:#9b927e}
+#add-exercise-btn,#save-workout-btn{background:var(--olive);white-space:nowrap}
+#workout-list{display:grid;gap:9px;margin:18px 0 0;padding:0;list-style:none}
+.exercise-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #e0d4bf;border-radius:12px;background:#e9dfce}
+.exercise-item.is-current{border-color:var(--olive);box-shadow:inset 4px 0 var(--olive)}
+.exercise-details{display:flex;min-width:0;flex-direction:column;gap:4px}
+.exercise-name{overflow-wrap:anywhere;font-weight:750}
+.exercise-duration{color:#756c54;font-size:.78rem}
+.exercise-actions{display:flex;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;gap:5px}
+.exercise-actions button{min-width:38px;min-height:36px;padding:7px 9px;font-size:.78rem}
+.exercise-actions .delete-btn{background:#dfc8b3}
+.empty-workout{padding:16px 12px;border:1px dashed #c7b99f;border-radius:12px;color:#786f58;font-size:.9rem;text-align:center}
+.save-panel{margin-bottom:18px}
+.save-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
+.save-form .field:last-child{grid-column:1/-1}
+.storage-note{display:flex;align-items:flex-start;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid #ded1bb}
+.storage-dot{width:9px;height:9px;flex:0 0 9px;margin-top:5px;border-radius:50%;background:#9a8c6e}
+#cloud-status{display:block;font-size:.85rem}
+#cloud-status[data-state="connected"]{color:#3f6335}
+.storage-note p{margin:4px 0 0;color:#756c54;font-size:.78rem;line-height:1.5}
+.cloud-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:18px}
+.cloud-form input:disabled{opacity:.65;cursor:not-allowed}
+.cloud-actions{display:flex;flex-wrap:wrap;grid-column:1/-1;gap:8px}
+.cloud-actions .secondary-btn{background:#d9c9ad}
+.cloud-actions .quiet-light-btn{border-color:#c7b99f;background:transparent}
+.cloud-actions [hidden]{display:none}
+footer{padding:4px 4px 0;color:#d4d0bf;font-size:.75rem;line-height:1.6}
+@media(max-width:600px){
+body{padding:18px 12px 26px}.page-header{padding-top:4px}.timer-card{border-radius:18px}
+#timer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#timer-controls button{width:100%}
+.exercise-form{grid-template-columns:minmax(0,1fr) 112px}#add-exercise-btn{grid-column:1/-1}
+.section-heading{align-items:flex-start}.section-note{max-width:125px}
+.exercise-item{align-items:flex-start;flex-direction:column}.exercise-actions{justify-content:flex-start}
+.save-form,.cloud-form{grid-template-columns:minmax(0,1fr)}.save-form .field:last-child,.cloud-actions{grid-column:auto}
+#save-workout-btn{width:100%}.cloud-actions button{flex:1 1 auto}
 }
-
-/* Header */
-h1, h2, h3 {
-    color: #CFBB99;
-    margin-bottom: 15px;
-}
-
-/* Timer Display */
-#timer-display {
-    font-size: 2em;
-    font-weight: bold;
-    color: #CFBB99;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Workout Container */
-#workout-container {
-    max-width: 600px;
-    margin: auto;
-}
-
-/* Exercise List Items */
-.exercise-item {
-    background-color: #CFBB99;
-    border-radius: 10px;
-    padding: 10px;
-    margin: 8px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* Exercise Name */
-.exercise-name {
-    font-weight: bold;
-    color: #4C3D19;
-}
-
-/* Button Container inside each exercise item */
-.exercise-item div {
-    display: flex;
-    gap: 5px; /* spacing between buttons */
-    justify-content: flex-end; /* align buttons to the right */
-    align-items: center;
-}
-
-/* Buttons */
-button {
-    background-color: #889063;
-    color: #4C3D19;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-/* Button Hover */
-button:hover {
-    background-color: #E5D7C4;
-    color: #354024;
-}
-
-/* Specific Buttons */
-.edit-btn { background-color: #889063; }
-.delete-btn { background-color: #CFBB99; color: #4C3D19; }
-.up-btn, .down-btn { background-color: #889063; }
-
-/* Hover overrides */
-.up-btn:hover, .down-btn:hover, .edit-btn:hover, .delete-btn:hover {
-    background-color: #E5D7C4;
-    color: #354024;
-}
-
-/* Form Inputs */
-input[type="text"], input[type="number"], select {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #4C3D19;
-    margin-right: 10px;
-}
-
-/* Save Workout Section */
-#save-workout-btn {
-    background-color: #889063;
-    color: #4C3D19;
-    font-weight: bold;
-}
-#save-workout-btn:hover {
-    background-color: #E5D7C4;
-    color: #354024;
-}
-
-/* Dropdown for Saved Workouts */
-#saved-workouts {
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #4C3D19;
-}
-
-/* Timer Controls Buttons */
-#start-btn, #pause-btn, #reset-btn, #test-beep-btn {
-    background-color: #889063;
-    color: #4C3D19;
-    font-weight: bold;
-}
-#start-btn:hover, #pause-btn:hover, #reset-btn:hover, #test-beep-btn:hover {
-    background-color: #E5D7C4;
-    color: #354024;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 600px) {
-    .exercise-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .exercise-item div {
-        margin-top: 5px;
-        justify-content: flex-start;
-    }
-    button {
-        margin: 0;
-    }
-}
-
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important}}
