@@ -44,7 +44,7 @@
         <button id="save-workout-btn" type="button">Save Workout</button>
         <label class="field" for="saved-workouts">Saved workouts<select id="saved-workouts"><option value="">-- Load Saved Workout --</option></select></label>
       </div>
-      <div class="storage-note"><span class="storage-dot" aria-hidden="true"></span><div><strong id="cloud-status" data-state="local">Cloud sync not connected</strong><p>Workouts save on this device. Connect a Firebase account below to sync the same workouts across devices.</p></div></div>
+      <div class="storage-note"><span class="storage-dot" aria-hidden="true"></span><div><strong id="cloud-status" data-state="local">Cloud sync not connected</strong><p id="cloud-description">Sign in to sync your saved workouts across devices.</p></div></div>
       <div class="cloud-form" aria-label="Cloud account">
         <label class="field" for="cloud-email">Account email<input type="email" id="cloud-email" placeholder="you@example.com" autocomplete="email" disabled></label>
         <label class="field" for="cloud-password">Password<input type="password" id="cloud-password" placeholder="At least 6 characters" autocomplete="current-password" disabled></label>
