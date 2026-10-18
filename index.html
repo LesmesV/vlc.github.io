@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Page setup: tells the browser how to display the page and where its styling lives. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#354024">
@@ -8,12 +9,15 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Main page wrapper keeps the timer and all controls aligned in one column. -->
   <main id="workout-container">
+    <!-- Page heading and personal note. The two lines use the same intro styling. -->
     <header class="page-header">
-      <p class="eyebrow">MOVE WITH INTENTION</p>
       <h1>Workout Timer</h1>
-      <p class="intro">Build a routine, press start, and let the timer guide you.</p>
+      <p class="intro">By Valentina Lesmes Campins<br>Just so that I can do Pamela Reif's ab workout without having to listen to that music again</p>
     </header>
+
+    <!-- Timer display and controls for starting, pausing, resetting, and testing audio. -->
     <section class="timer-card" aria-label="Workout timer">
       <p class="timer-label">TIME REMAINING</p>
       <div id="timer-display" role="timer" aria-live="off">Ready?</div>
@@ -27,7 +31,10 @@
       </div>
       <p class="timer-hint">A 10-second get-ready countdown starts each workout. Speech and beeps play as your next exercise approaches.</p>
     </section>
+    <!-- Live status messages explain what the timer is doing or report errors. -->
     <p id="status-message" role="status" aria-live="polite">Ready when you are.</p>
+
+    <!-- Exercise builder: add exercises, set their durations, and reorder the list. -->
     <section class="panel" aria-labelledby="build-heading">
       <div class="section-heading"><div><p class="eyebrow">YOUR ROUTINE</p><h2 id="build-heading">Build your workout</h2></div><span class="section-note">Minimum 10 sec per exercise</span></div>
       <div id="exercise-form" class="exercise-form">
@@ -37,6 +44,7 @@
       </div>
       <ul id="workout-list" aria-label="Exercises in this workout"></ul>
     </section>
+    <!-- Saved workouts and optional Firebase sign-in for syncing between devices. -->
     <section class="panel save-panel" aria-labelledby="save-heading">
       <div class="section-heading"><div><p class="eyebrow">KEEP YOUR ROUTINES</p><h2 id="save-heading">Save &amp; load workouts</h2></div></div>
       <div id="save-load-workout" class="save-form">
@@ -53,6 +61,7 @@
     </section>
     <footer>Audio behavior depends on your browser and device. Timer sounds may play alongside Spotify, but no website can guarantee that every device will avoid ducking or pausing music.</footer>
   </main>
+  <!-- Firebase libraries provide account sign-in and cloud database access. -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
