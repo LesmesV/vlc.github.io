@@ -1,52 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout Timer</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#354024">
+  <title>Workout Timer</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="workout-container">
-        <h1>Workout Timer</h1>
-
-        <!-- Timer Display -->
-        <div id="timer-display">Ready?</div>
-
-        <!-- Timer Controls -->
-        <div id="timer-controls">
-            <button id="start-btn">Start</button>
-            <button id="pause-btn">Pause</button>
-            <button id="reset-btn">Reset</button>
-            <button id="test-beep-btn">Test Beep</button>
-        </div>
-
-        <hr>
-
-        <!-- Add Exercise Form -->
-        <div id="exercise-form">
-            <input type="text" id="exercise-name-input" placeholder="Exercise Name">
-            <input type="number" id="exercise-duration-input" placeholder="Duration (s)" min="10">
-            <button id="add-exercise-btn">Add Exercise</button>
-        </div>
-
-        <!-- Workout List -->
-        <ul id="workout-list">
-            <!-- Dynamic exercise items inserted here -->
-        </ul>
-
-        <hr>
-
-        <!-- Save / Load Workouts -->
-        <div id="save-load-workout">
-            <input type="text" id="workout-title-input" placeholder="Workout Title">
-            <button id="save-workout-btn">Save Workout</button>
-            <select id="saved-workouts">
-                <option value="">-- Load Saved Workout --</option>
-            </select>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <main id="workout-container">
+    <header class="page-header">
+      <p class="eyebrow">MOVE WITH INTENTION</p>
+      <h1>Workout Timer</h1>
+      <p class="intro">Build a routine, press start, and let the timer guide you.</p>
+    </header>
+    <section class="timer-card" aria-label="Workout timer">
+      <p class="timer-label">TIME REMAINING</p>
+      <div id="timer-display" role="timer" aria-live="off">Ready?</div>
+      <p id="current-exercise">Build your workout, then press Start Workout</p>
+      <div class="progress-track" aria-hidden="true"><div id="timer-progress"></div></div>
+      <div id="timer-controls">
+        <button id="start-btn" class="primary-btn" type="button">Start Workout</button>
+        <button id="pause-btn" type="button" disabled>Pause</button>
+        <button id="reset-btn" type="button">Reset</button>
+        <button id="test-beep-btn" type="button" class="quiet-btn">Test Beep</button>
+      </div>
+      <p class="timer-hint">A 10-second get-ready countdown starts each workout. Speech and beeps play as your next exercise approaches.</p>
+    </section>
+    <p id="status-message" role="status" aria-live="polite">Ready when you are.</p>
+    <section class="panel" aria-labelledby="build-heading">
+      <div class="section-heading"><div><p class="eyebrow">YOUR ROUTINE</p><h2 id="build-heading">Build your workout</h2></div><span class="section-note">Minimum 10 sec per exercise</span></div>
+      <div id="exercise-form" class="exercise-form">
+        <label class="field field-name" for="exercise-name-input">Exercise name<input type="text" id="exercise-name-input" placeholder="e.g. Jumping jacks" maxlength="80" autocomplete="off"></label>
+        <label class="field field-duration" for="exercise-duration-input">Duration (seconds)<input type="number" id="exercise-duration-input" placeholder="30" min="10" step="1" inputmode="numeric"></label>
+        <button id="add-exercise-btn" type="button">Add Exercise</button>
+      </div>
+      <ul id="workout-list" aria-label="Exercises in this workout"></ul>
+    </section>
+    <section class="panel save-panel" aria-labelledby="save-heading">
+      <div class="section-heading"><div><p class="eyebrow">KEEP YOUR ROUTINES</p><h2 id="save-heading">Save &amp; load workouts</h2></div></div>
+      <div id="save-load-workout" class="save-form">
+        <label class="field" for="workout-title-input">Workout name<input type="text" id="workout-title-input" placeholder="e.g. Upper body day" maxlength="80" autocomplete="off"></label>
+        <button id="save-workout-btn" type="button">Save Workout</button>
+        <label class="field" for="saved-workouts">Saved workouts<select id="saved-workouts"><option value="">-- Load Saved Workout --</option></select></label>
+      </div>
+      <div class="storage-note"><span class="storage-dot" aria-hidden="true"></span><div><strong id="cloud-status" data-state="local">Cloud sync not connected</strong><p>Workouts save on this device. Connect a Firebase account below to sync the same workouts across devices.</p></div></div>
+      <div class="cloud-form" aria-label="Cloud account">
+        <label class="field" for="cloud-email">Account email<input type="email" id="cloud-email" placeholder="you@example.com" autocomplete="email" disabled></label>
+        <label class="field" for="cloud-password">Password<input type="password" id="cloud-password" placeholder="At least 6 characters" autocomplete="current-password" disabled></label>
+        <div class="cloud-actions"><button id="cloud-sign-in" type="button" disabled>Sign In</button><button id="cloud-create-account" type="button" class="secondary-btn" disabled>Create Account</button><button id="cloud-sign-out" type="button" class="quiet-light-btn" hidden>Sign Out</button></div>
+      </div>
+    </section>
+    <footer>Audio behavior depends on your browser and device. Timer sounds may play alongside Spotify, but no website can guarantee that every device will avoid ducking or pausing music.</footer>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
