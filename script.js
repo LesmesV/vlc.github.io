@@ -24,6 +24,7 @@ const titleInput = $('workout-title-input');
 const saveBtn = $('save-workout-btn');
 const savedSelect = $('saved-workouts');
 const cloudStatus = $('cloud-status');
+const cloudDescription = $('cloud-description');
 const emailInput = $('cloud-email');
 const passwordInput = $('cloud-password');
 const signInBtn = $('cloud-sign-in');
@@ -103,7 +104,7 @@ function beep(duration, frequency) {
     osc.type = 'sine';
     osc.frequency.value = frequency || 880;
     gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.48, ctx.currentTime + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (duration || 120) / 1000);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -117,7 +118,7 @@ function speak(text) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1;
-    utterance.volume = 0.9;
+    utterance.volume = 1.0;
     window.speechSynthesis.speak(utterance);
   } catch (error) { console.warn('Speech failed', error); }
 }
@@ -242,7 +243,7 @@ function tick() {
   if (phase === 'preparation') {
     updateDisplay(remaining, 'Starting: ' + workoutPlan[0].name);
     if (seconds === 5 && lastCueSecond !== 5) speak(workoutPlan[0].name);
-    if ([3, 2, 1].includes(seconds) && lastCueSecond !== seconds) beep(110, seconds === 1 ? 1050 : 800);
+    if ([3, 2, 1].includes(seconds) && lastCueSecond !== seconds) beep(150, seconds === 1 ? 1050 : 800);
   } else {
     updateDisplay(remaining, 'Now: ' + workoutPlan[currentIndex].name);
     if (seconds === 5 && lastCueSecond !== 5 && currentIndex < workoutPlan.length - 1) {
@@ -374,6 +375,7 @@ function setCloudControls(enabled) {
 async function initialiseCloud() {
   if (!cloudConfigured || !window.firebase) {
     cloudStatus.textContent = 'Cloud sync not connected';
+    cloudDescription.textContent = 'Workouts are saved on this device only until Firebase is configured.';
     setCloudControls(false);
     return;
   }
@@ -389,17 +391,20 @@ async function initialiseCloud() {
       signOutBtn.hidden = !user;
       if (!user) {
         cloudStatus.textContent = 'Cloud sync not connected';
+        cloudDescription.textContent = 'Sign in to sync your saved workouts across devices.';
         cloudStatus.dataset.state = 'local';
         return;
       }
       emailInput.value = user.email || '';
       cloudStatus.textContent = 'Signed in as ' + (user.email || 'your account');
+      cloudDescription.textContent = 'Connecting to your saved workouts…';
       cloudStatus.dataset.state = 'connected';
       await loadCloudWorkouts();
     });
   } catch (error) {
     console.error('Firebase setup failed', error);
     cloudStatus.textContent = 'Cloud sync needs setup';
+    cloudDescription.textContent = 'Cloud sync could not connect. Your locally saved workouts remain on this device.';
     setStatus('Local saving works. Cloud sync could not connect; check Firebase setup.', 'error');
   }
 }
@@ -414,10 +419,12 @@ async function loadCloudWorkouts() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedWorkouts));
     refreshSavedList();
     if (Object.keys(local).length) await saveCloudWorkouts();
+    cloudDescription.textContent = 'Your saved workouts are synced to this Firebase account and available on devices where you sign in.';
     setStatus('Your workouts are available on this device and sync to your signed-in account.');
   } catch (error) {
     console.error('Cloud load failed', error);
     cloudStatus.textContent = 'Cloud load failed';
+    cloudDescription.textContent = 'Cloud loading failed. Your local workouts are still available on this device.';
     setStatus('Could not load cloud workouts. Your local workouts are still available.', 'error');
   }
 }
@@ -434,9 +441,11 @@ async function saveCloudWorkouts() {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     cloudStatus.textContent = 'Signed in as ' + (cloudUser.email || 'your account') + ' · synced';
+    cloudDescription.textContent = 'Your saved workouts are synced to this Firebase account and available on devices where you sign in.';
   } catch (error) {
     console.error('Cloud save failed', error);
     cloudStatus.textContent = 'Cloud save failed';
+    cloudDescription.textContent = 'Cloud saving failed. Your workouts are still saved on this device; check Firebase rules and connection.';
     setStatus('Saved on this device, but cloud sync failed. Check your connection and Firebase rules.', 'error');
   }
 }
