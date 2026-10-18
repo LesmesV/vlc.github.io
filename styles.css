@@ -69,7 +69,11 @@ input::placeholder{color:#9b927e}
 .cloud-actions .quiet-light-btn{border-color:#c7b99f;background:transparent}
 .cloud-actions [hidden]{display:none}
 /* Footer note and responsive adjustments for smaller screens. */
-footer{padding:4px 4px 0;color:#d4d0bf;font-size:.75rem;line-height:1.6}
+/* FOOTER INSTRUCTIONS: a readable, numbered guide for first-time users. */
+footer{padding:12px 4px 0;color:#d4d0bf;font-size:.9rem;line-height:1.7}
+footer h2{margin:0 0 10px;color:var(--cream);font-size:1rem;letter-spacing:0}
+footer ol{padding-left:1.4rem;margin:0}
+footer li{padding-left:4px;margin:0 0 6px}
 @media(max-width:600px){
 body{padding:18px 12px 26px}.page-header{padding-top:4px}.timer-card{border-radius:18px}
 #timer-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#timer-controls button{width:100%}
