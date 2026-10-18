@@ -59,7 +59,16 @@
         <div class="cloud-actions"><button id="cloud-sign-in" type="button" disabled>Sign In</button><button id="cloud-create-account" type="button" class="secondary-btn" disabled>Create Account</button><button id="cloud-sign-out" type="button" class="quiet-light-btn" hidden>Sign Out</button></div>
       </div>
     </section>
-    <footer>Audio behavior depends on your browser and device. Timer sounds may play alongside Spotify, but no website can guarantee that every device will avoid ducking or pausing music.</footer>
+    <!-- Quick instructions: the four steps below explain the basic workout workflow. -->
+    <footer class="usage-instructions">
+      <h2>How to use the workout timer</h2>
+      <ol>
+        <li>Add the exercises and durations you want. You can edit each exercise after adding it.</li>
+        <li>If you want to do the workout again in the future, create an account below using your email and a password.</li>
+        <li>Give your workout a name and select <strong>Save Workout</strong>.</li>
+        <li>Press <strong>Start Workout</strong> and follow the timer.</li>
+      </ol>
+    </footer>
   </main>
   <!-- Firebase libraries provide account sign-in and cloud database access. -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
