@@ -1,4 +1,6 @@
+/* Design tokens: shared colours and default font used across the whole site. */
 :root{--forest:#354024;--olive:#889063;--sand:#CFBB99;--cream:#E5D7C4;--ink:#4C3D19;--paper:#f3ecdf;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+/* Global layout: makes element sizing predictable and sets the page background. */
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;padding:clamp(16px,4vw,42px) 16px 32px;background:var(--forest);color:var(--ink)}
 button,input,select{font:inherit}
@@ -7,6 +9,7 @@ button:hover:not(:disabled){background:var(--cream);transform:translateY(-1px)}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sand);outline-offset:3px}
 button:disabled{opacity:.45;cursor:not-allowed}
 #workout-container{width:min(100%,760px);margin:0 auto}
+/* Header typography: styles the title and the two-line personal note. */
 .page-header{padding:10px 4px 22px}
 .eyebrow{margin:0 0 8px;color:var(--olive);font-size:.72rem;font-weight:800;letter-spacing:.16em}
 .page-header .eyebrow{color:var(--sand)}
@@ -14,6 +17,7 @@ h1,h2,p{margin-top:0}
 h1{margin-bottom:8px;color:var(--cream);font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.045em;line-height:1.05}
 h2{margin-bottom:0;color:var(--ink);font-size:clamp(1.25rem,3vw,1.6rem);letter-spacing:-.025em}
 .intro{margin-bottom:0;color:#e2d8c8;line-height:1.6}
+/* Timer card: display, progress bar, buttons, and short timer instructions. */
 .timer-card{padding:clamp(20px,5vw,34px);border:1px solid rgba(229,215,196,.14);border-radius:24px;background:#26301b;color:var(--cream);box-shadow:0 16px 38px rgba(0,0,0,.14);text-align:center}
 .timer-label{margin-bottom:4px;color:var(--sand);font-size:.72rem;font-weight:800;letter-spacing:.15em}
 #timer-display{color:var(--cream);font-size:clamp(3.4rem,13vw,6.2rem);font-variant-numeric:tabular-nums;font-weight:750;letter-spacing:-.065em;line-height:1.15}
@@ -27,8 +31,10 @@ h2{margin-bottom:0;color:var(--ink);font-size:clamp(1.25rem,3vw,1.6rem);letter-s
 #timer-controls .quiet-btn{background:transparent;border-color:rgba(229,215,196,.25);color:var(--cream)}
 #timer-controls .quiet-btn:hover:not(:disabled){color:var(--forest)}
 .timer-hint{max-width:520px;margin:18px auto 0;color:#c9c8b7;font-size:.83rem;line-height:1.55}
+/* Status line: messages below the timer, including errors. */
 #status-message{min-height:1.4em;margin:14px 4px 22px;color:var(--cream);font-size:.9rem;line-height:1.5}
 #status-message[data-type="error"]{color:#ffd0c4}
+/* Builder and saved-workout panels: shared cards and form controls. */
 .panel{margin-top:18px;padding:clamp(18px,4vw,28px);border-radius:18px;background:var(--paper)}
 .section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px}
 .section-note{color:#6e684f;font-size:.76rem;text-align:right}
@@ -50,6 +56,7 @@ input::placeholder{color:#9b927e}
 .save-panel{margin-bottom:18px}
 .save-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
 .save-form .field:last-child{grid-column:1/-1}
+/* Cloud account status and sign-in form. */
 .storage-note{display:flex;align-items:flex-start;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid #ded1bb}
 .storage-dot{width:9px;height:9px;flex:0 0 9px;margin-top:5px;border-radius:50%;background:#9a8c6e}
 #cloud-status{display:block;font-size:.85rem}
@@ -61,6 +68,7 @@ input::placeholder{color:#9b927e}
 .cloud-actions .secondary-btn{background:#d9c9ad}
 .cloud-actions .quiet-light-btn{border-color:#c7b99f;background:transparent}
 .cloud-actions [hidden]{display:none}
+/* Footer note and responsive adjustments for smaller screens. */
 footer{padding:4px 4px 0;color:#d4d0bf;font-size:.75rem;line-height:1.6}
 @media(max-width:600px){
 body{padding:18px 12px 26px}.page-header{padding-top:4px}.timer-card{border-radius:18px}
