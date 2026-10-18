@@ -2,10 +2,10 @@
 const $ = id => document.getElementById(id);
 const STORAGE_KEY = 'allMyWorkouts';
 const CLOUD_CONFIG = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  appId: 'YOUR_APP_ID'
+  apiKey: 'AIzaSyAd4BY1U5AHB4qdDk3TlzD_r8D7QVNmWpk',
+  authDomain: 'workout-app-a8daa.firebaseapp.com',
+  projectId: 'workout-app-a8daa',
+  appId: '1:460195350325:web:edf8c1757373bbb334ee7c'
 };
 const cloudConfigured = CLOUD_CONFIG.apiKey !== 'YOUR_API_KEY' && CLOUD_CONFIG.projectId !== 'YOUR_PROJECT_ID' && CLOUD_CONFIG.appId !== 'YOUR_APP_ID';
 const workoutList = $('workout-list');
