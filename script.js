@@ -49,8 +49,11 @@ let cloudSaveTimeout = null;
 
 function readSavedWorkouts() {
   try {
-    const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (current && !Array.isArray(current) && typeof current === 'object') return current;
+    const rawCurrent = localStorage.getItem(STORAGE_KEY);
+    if (rawCurrent) {
+      const current = JSON.parse(rawCurrent);
+      if (current && !Array.isArray(current) && typeof current === 'object') return current;
+    }
     const legacy = JSON.parse(localStorage.getItem('workouts') || '[]');
     const migrated = {};
     if (Array.isArray(legacy)) legacy.forEach(item => {
