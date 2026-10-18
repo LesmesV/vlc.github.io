@@ -320,12 +320,13 @@ addBtn.addEventListener('click', () => {
   if (lockedNow()) return setStatus('Reset the timer before editing the workout.', 'error');
   if (!name) return setStatus('Enter an exercise name.', 'error');
   if (!Number.isFinite(duration) || duration < 10) return setStatus('Each exercise must be at least 10 seconds long.', 'error');
+  const wasEditing = editingIndex >= 0;
   const exercise = { name, duration };
-  if (editingIndex >= 0) workoutPlan[editingIndex] = exercise;
+  if (wasEditing) workoutPlan[editingIndex] = exercise;
   else workoutPlan.push(exercise);
   cancelEdit();
   renderWorkout();
-  setStatus(name + ' ' + (editingIndex >= 0 ? 'updated.' : 'added.'));
+  setStatus(name + ' ' + (wasEditing ? 'updated.' : 'added.'));
   nameInput.focus();
 });
 [nameInput, durationInput].forEach(input => input.addEventListener('keydown', event => {
