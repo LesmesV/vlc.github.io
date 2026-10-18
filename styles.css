@@ -16,7 +16,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 h1,h2,p{margin-top:0}
 h1{margin-bottom:8px;color:var(--cream);font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.045em;line-height:1.05}
 h2{margin-bottom:0;color:var(--ink);font-size:clamp(1.25rem,3vw,1.6rem);letter-spacing:-.025em}
-.intro{margin-bottom:0;color:#e2d8c8;line-height:1.6}
+.intro{margin-bottom:0;color:#e2d8c8;line-height:1.6;font-size:1.12rem}
 /* Timer card: display, progress bar, buttons, and short timer instructions. */
 .timer-card{padding:clamp(20px,5vw,34px);border:1px solid rgba(229,215,196,.14);border-radius:24px;background:#26301b;color:var(--cream);box-shadow:0 16px 38px rgba(0,0,0,.14);text-align:center}
 .timer-label{margin-bottom:4px;color:var(--sand);font-size:.72rem;font-weight:800;letter-spacing:.15em}
