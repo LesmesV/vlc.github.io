@@ -74,17 +74,26 @@ let cloudSaveTimeout = null;
 // Read workouts from this browser, migrating the older format if necessary.
 function readSavedWorkouts() {
   try {
+    // Try the current storage format first.
     const rawCurrent = localStorage.getItem(STORAGE_KEY);
+    // Only parse it if this browser has something saved under the current key.
     if (rawCurrent) {
+      // Turn the saved JSON text back into a JavaScript object.
       const current = JSON.parse(rawCurrent);
+      // Accept only an object-shaped collection of workouts.
       if (current && !Array.isArray(current) && typeof current === 'object') return current;
     }
+    // If the new format is absent, try the older format used by an earlier version.
     const legacy = JSON.parse(localStorage.getItem('workouts') || '[]');
+    // Build a fresh object to hold any workouts converted from the old format.
     const migrated = {};
+    // Convert each old workout only when it has a title and an exercise list.
     if (Array.isArray(legacy)) legacy.forEach(item => {
       if (item && item.title && Array.isArray(item.exercises)) migrated[item.title] = item.exercises;
     });
+    // Store the converted data in the current format for future visits.
     localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+    // Return the workouts that were migrated (or an empty object if none existed).
     return migrated;
   } catch (error) {
     console.warn('Could not read saved workouts', error);
@@ -100,8 +109,10 @@ function setStatus(message, type) {
 // Save the current saved-workout list locally, refresh the menu, and queue cloud sync.
 function persistLocal() {
   try {
+    // Convert the saved workouts to text and store them in this browser.
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedWorkouts));
     refreshSavedList();
+    // If a user is signed in, also queue a copy for Firebase.
     scheduleCloudSave();
     return true;
   } catch (error) {
@@ -111,14 +122,18 @@ function persistLocal() {
 }
 // Rebuild the dropdown of saved workout names while keeping its selection if possible.
 function refreshSavedList() {
+  // Remember which workout the user had selected before refreshing the menu.
   const selected = savedSelect.value;
+  // Clear old options and add the dropdown's placeholder.
   savedSelect.replaceChildren(new Option('-- Load Saved Workout --', ''));
+  // Sort workout names alphabetically and add each one to the dropdown.
   Object.keys(savedWorkouts).sort((a, b) => a.localeCompare(b)).forEach(title => savedSelect.add(new Option(title, title)));
   if (Object.prototype.hasOwnProperty.call(savedWorkouts, selected)) savedSelect.value = selected;
 }
 // AUDIO CUES: create browser audio, play countdown beeps, and speak the next exercise name.
 // Create or resume the browser audio engine after the user interacts with the page.
 function ensureAudio() {
+  // Support the standard audio engine and Safari's older prefixed version.
   const Audio = window.AudioContext || window.webkitAudioContext;
   if (!Audio) return null;
   if (!audioContext) audioContext = new Audio();
@@ -130,14 +145,23 @@ function beep(duration, frequency) {
   const ctx = ensureAudio();
   if (!ctx) return;
   try {
+    // The oscillator generates the beep's tone.
     const osc = ctx.createOscillator();
+    // The gain node controls how loud the beep is.
     const gain = ctx.createGain();
+    // A sine wave makes a simple, clean beep.
     osc.type = 'sine';
+    // Use the requested pitch, or 880 Hz when none was supplied.
     osc.frequency.value = frequency || 880;
+    // Start almost silent to avoid a click at the beginning of the sound.
     gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    // Raise the beep quickly to its chosen volume.
     gain.gain.exponentialRampToValueAtTime(0.48, ctx.currentTime + 0.01);
+    // Fade the beep out at the end of its duration.
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (duration || 120) / 1000);
+    // Send the tone through the volume control before it reaches the speakers.
     osc.connect(gain);
+    // Send the finished sound to the browser's audio output.
     gain.connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + (duration || 120) / 1000 + 0.02);
@@ -148,8 +172,11 @@ function speak(text) {
   if (!('speechSynthesis' in window)) return;
   try {
     window.speechSynthesis.cancel();
+    // Wrap the exercise name in a speech request the browser can read aloud.
     const utterance = new SpeechSynthesisUtterance(text);
+    // Use the browser's normal speaking speed.
     utterance.rate = 1;
+    // Request the maximum speech volume allowed by the browser API.
     utterance.volume = 1.0;
     window.speechSynthesis.speak(utterance);
   } catch (error) { console.warn('Speech failed', error); }
@@ -243,10 +270,12 @@ function moveExercise(index, direction) {
 // TIMER ENGINE: update the countdown, start exercises, manage pauses, and finish/reset a workout.
 // Update the visible timer, exercise name, and progress bar.
 function updateDisplay(seconds, label) {
+  // Show the remaining seconds as minutes and seconds.
   timerDisplay.textContent = formatTime(seconds);
   timerDisplay.classList.toggle('is-countdown', phase === 'preparation');
   currentDisplay.textContent = label;
   const total = phase === 'preparation' ? 10 : Math.max(1, Number(workoutPlan[currentIndex]?.duration) || 1);
+  // Turn the remaining time into a percentage for the visual progress bar.
   progressBar.style.width = (Math.max(0, Math.min(1, seconds / total)) * 100) + '%';
 }
 // Stop the repeating timer updates if one is currently running.
@@ -262,6 +291,7 @@ function beginWorkout() {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   currentIndex = 0;
   phase = 'preparation';
+  // Set the preparation countdown to end ten seconds from now.
   phaseEndsAt = Date.now() + 10000;
   lastCueSecond = null;
   startBtn.disabled = true;
@@ -270,6 +300,7 @@ function beginWorkout() {
   pauseBtn.textContent = 'Pause';
   setStatus('Get ready. Your first exercise starts in 10 seconds.');
   tick();
+  // Re-check the timer ten times per second for a responsive display.
   intervalId = setInterval(tick, 100);
 }
 // Begin an exercise and calculate when its duration should end.
@@ -436,8 +467,10 @@ async function initialiseCloud() {
     cloudAuth = firebase.auth();
     cloudDb = firebase.firestore();
     await cloudAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    // Firebase calls this whenever the visitor signs in or signs out.
     cloudAuth.onAuthStateChanged(async user => {
       cloudUser = user || null;
+      // Cloud writes are allowed only when a user is signed in.
       cloudReady = Boolean(user);
       setCloudControls(true);
       signOutBtn.hidden = !user;
@@ -464,10 +497,15 @@ async function initialiseCloud() {
 async function loadCloudWorkouts() {
   if (!cloudReady || !cloudUser || !cloudDb) return;
   try {
+    // Each user's data lives under their unique Firebase user ID.
     const ref = cloudDb.collection('users').doc(cloudUser.uid).collection('settings').doc('workouts');
+    // Download the workout document for this account.
     const snapshot = await ref.get();
+    // Use the cloud workouts if the document exists; otherwise start with an empty object.
     const remote = snapshot.exists && snapshot.data().workouts ? snapshot.data().workouts : {};
+    // Keep a reference to workouts already saved in this browser.
     const local = savedWorkouts;
+    // Merge both sets; same-named local workouts take precedence in this version.
     savedWorkouts = Object.assign({}, remote, local);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedWorkouts));
     refreshSavedList();
@@ -492,7 +530,9 @@ async function saveCloudWorkouts() {
   if (!cloudReady || !cloudUser || !cloudDb) return;
   try {
     await cloudDb.collection('users').doc(cloudUser.uid).collection('settings').doc('workouts').set({
+      // Store the complete saved-workout collection for this account.
       workouts: savedWorkouts,
+      // Let Firestore record when this cloud save happened.
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     cloudStatus.textContent = 'Signed in as ' + (cloudUser.email || 'your account') + ' · synced';
